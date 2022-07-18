@@ -3,8 +3,10 @@ package org.example;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 public class Main {
     public static void main(String[] args) {
@@ -16,7 +18,13 @@ public class Main {
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");  // value deserializer
 
         Producer<String,String> producer = new KafkaProducer<>(props);
-        producer.send(new ProducerRecord<>("peter-topic","Apache Kafka"));
-        producer.close();
+        try{
+            RecordMetadata metadata = producer.send(new ProducerRecord<>("peter-topic","Apache Kafka")).get();
+            System.out.printf("metadata: %s, Partition: %d, Offset: %s", metadata,metadata.partition(),metadata.offset());
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally {
+            producer.close();
+        }
     }
 }
